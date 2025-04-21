@@ -50,9 +50,25 @@ st.sidebar.button("🔒 Logout", on_click=lambda: st.session_state.update({"logg
 # -------------------------------
 @st.cache_resource
 def load_sentiment_pipeline():
-    return pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
+    try:
+        # Try loading the full model first
+        return pipeline("sentiment-analysis", 
+                      model="cardiffnlp/twitter-roberta-base-sentiment",
+                      device="cpu")  # Force CPU to avoid GPU memory issues
+    except Exception as e:
+        st.warning(f"⚠️ Couldn't load full sentiment model: {str(e)}. Falling back to smaller model.")
+        try:
+            # Fallback to a smaller model
+            return pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+        except Exception as e:
+            st.error(f"❌ Failed to load any sentiment analysis model: {str(e)}")
+            return None
 
 sentiment_pipe = load_sentiment_pipeline()
+if sentiment_pipe is None:
+    st.error("Could not initialize sentiment analysis. Some features may not work.")
+    st.stop()
+
 
 # -------------------------------
 # AI-generated suggestions
