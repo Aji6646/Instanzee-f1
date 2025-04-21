@@ -51,17 +51,13 @@ st.sidebar.button("🔒 Logout", on_click=lambda: st.session_state.update({"logg
 @st.cache_resource
 def load_sentiment_pipeline():
     try:
-        # Try loading the full model first
-        return pipeline("sentiment-analysis", 
-                      model="cardiffnlp/twitter-roberta-base-sentiment",
-                      device="cpu")  # Force CPU to avoid GPU memory issues
+        return pipeline("sentiment-analysis", model="./local_model_dir")
     except Exception as e:
-        st.warning(f"⚠️ Couldn't load full sentiment model: {str(e)}. Falling back to smaller model.")
+        st.warning(f"⚠️ Couldn't load full sentiment model: {e}. Falling back to smaller model.")
         try:
-            # Fallback to a smaller model
             return pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-        except Exception as e:
-            st.error(f"❌ Failed to load any sentiment analysis model: {str(e)}")
+        except Exception as e2:
+            st.error(f"❌ Failed to load any sentiment analysis model: {e2}")
             return None
 
 sentiment_pipe = load_sentiment_pipeline()
@@ -185,13 +181,15 @@ def extract_video_features(uploaded_file):
         }
     
 def get_bert_sentiment(text):
+    if not sentiment_pipe:
+        return 0.0, 0.5, "Neutral"
     try:
         result = sentiment_pipe(text[:512])[0]
-        label = result['label']
+        label = result['label'].upper()
         score = result['score']
-        if label == 'LABEL_0':
+        if "NEGATIVE" in label:
             return -score, 0.8, "Negative"
-        elif label == 'LABEL_1':
+        elif "NEUTRAL" in label:
             return 0.0, 0.5, "Neutral"
         else:
             return score, 0.8, "Positive"
