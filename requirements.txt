@@ -11,3 +11,4 @@ torch
 emoji
 tqdm
 openai
+opencv-python
