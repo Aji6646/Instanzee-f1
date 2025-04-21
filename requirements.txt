@@ -1,0 +1,13 @@
+streamlit
+pandas
+numpy
+scikit-learn
+textblob
+plotly
+instaloader
+fpdf
+transformers 
+torch 
+emoji
+tqdm
+openai
