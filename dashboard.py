@@ -51,14 +51,10 @@ st.sidebar.button("🔒 Logout", on_click=lambda: st.session_state.update({"logg
 @st.cache_resource
 def load_sentiment_pipeline():
     try:
-        return pipeline("sentiment-analysis", model="./local_model_dir")
+        return pipeline("sentiment-analysis", model="models/twitter-roberta-base-sentiment")
     except Exception as e:
-        st.warning(f"⚠️ Couldn't load full sentiment model: {e}. Falling back to smaller model.")
-        try:
-            return pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-        except Exception as e2:
-            st.error(f"❌ Failed to load any sentiment analysis model: {e2}")
-            return None
+        st.warning(f"⚠️ Couldn't load sentiment model: {e}")
+        return None
 
 sentiment_pipe = load_sentiment_pipeline()
 if sentiment_pipe is None:
