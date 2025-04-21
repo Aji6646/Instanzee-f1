@@ -19,6 +19,13 @@ from openai import OpenAI
 import instaloader
 from instaloader import Post
 import re  
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="cardiffnlp/twitter-roberta-base-sentiment",
+    local_dir="./models/twitter-roberta-base-sentiment",
+    local_dir_use_symlinks=False  # ensures full files are copied
+)
 
 # -------------------------------
 # Session State and Access Control
@@ -51,10 +58,15 @@ st.sidebar.button("🔒 Logout", on_click=lambda: st.session_state.update({"logg
 @st.cache_resource
 def load_sentiment_pipeline():
     try:
-        return pipeline("sentiment-analysis", model="models/twitter-roberta-base-sentiment")
+        return pipeline(
+            "sentiment-analysis",
+            model="./models/twitter-roberta-base-sentiment",
+            tokenizer="./models/twitter-roberta-base-sentiment"
+        )
     except Exception as e:
         st.warning(f"⚠️ Couldn't load sentiment model: {e}")
         return None
+
 
 sentiment_pipe = load_sentiment_pipeline()
 if sentiment_pipe is None:
